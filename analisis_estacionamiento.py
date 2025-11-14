@@ -1,3 +1,4 @@
+import html
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -139,25 +140,40 @@ if archivo:
     
    
 
-    # Cargar plantilla HTML
+    import os
+def entorno_soporta_pdf():
+    return "STREAMLIT_SERVER_HOST" not in os.environ
+
+def generar_html(grafico_carros, grafico_tarifas, resumen_kpi, plantilla="reporte_template.html"):
     env = Environment(loader=FileSystemLoader('.'))
-    template = env.get_template("reporte_template.html")
-
-    # Renderizar HTML con datos
-    html = template.render(
-    grafico_carros="grafico_carros.png",
-    grafico_tarifas="grafico_tarifas.png",
-    tabla_kpi=resumen_kpi.to_html(index=False)
+    template = env.get_template(plantilla)
+    return template.render(
+        grafico_carros=grafico_carros,
+        grafico_tarifas=grafico_tarifas,
+        tabla_kpi=resumen_kpi.to_html(index=False)
     )
+    
+# Generar HTML
+    html = generar_html("grafico_carros.png", "grafico_tarifas.png", resumen_kpi)
 
-    # Generar PDF
+if entorno_soporta_pdf():
+    # Generar PDF con WeasyPrint
     HTML(string=html).write_pdf("reporte_estacionamiento.pdf")
-
-    # Botón de descarga
     with open("reporte_estacionamiento.pdf", "rb") as f:
         st.download_button(
-        label="📥 Descargar reporte PDF",
-        data=f.read(),
-        file_name="reporte_estacionamiento.pdf",
-        mime="application/pdf"
-    )
+            label="📥 Descargar reporte PDF",
+            data=f.read(),
+            file_name="reporte_estacionamiento.pdf",
+            mime="application/pdf"
+        )
+else:
+    st.warning("⚠️ La generación de PDF no está disponible en este entorno. Puedes descargar el HTML.")
+    with open("reporte_estacionamiento.html", "w", encoding="utf-8") as f:
+        f.write(html)
+    with open("reporte_estacionamiento.html", "rb") as f:
+        st.download_button(
+            label="📥 Descargar reporte HTML",
+            data=f.read(),
+            file_name="reporte_estacionamiento.html",
+            mime="text/html"
+        )
