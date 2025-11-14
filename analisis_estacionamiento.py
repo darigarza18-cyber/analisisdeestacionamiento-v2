@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from jinja2 import Environment, FileSystemLoader
-import pdfkit
+from weasyprint import HTML
 
 
 # Subir archivo
@@ -136,24 +136,28 @@ if archivo:
     tabla_tarifas.set_index("Tarifa")["Cantidad"].plot(kind='bar', ax=ax2)
     fig2.savefig("grafico_tarifas.png", bbox_inches='tight')
 
-    # 🧠 Renderizar HTML con Jinja2
+    
+   
+
+    # Cargar plantilla HTML
     env = Environment(loader=FileSystemLoader('.'))
     template = env.get_template("reporte_template.html")
 
+    # Renderizar HTML con datos
     html = template.render(
     grafico_carros="grafico_carros.png",
     grafico_tarifas="grafico_tarifas.png",
     tabla_kpi=resumen_kpi.to_html(index=False)
     )
 
-    # 📄 Generar PDF con pdfkit
-    pdfkit.from_string(html, "reporte_estacionamiento.pdf")
+    # Generar PDF
+    HTML(string=html).write_pdf("reporte_estacionamiento.pdf")
 
-    # 📥 Botón de descarga
+    # Botón de descarga
     with open("reporte_estacionamiento.pdf", "rb") as f:
         st.download_button(
-            label="📥 Descargar reporte PDF",
-            data=f.read(),
-            file_name="reporte_estacionamiento.pdf",
-            mime="application/pdf"
-        )
+        label="📥 Descargar reporte PDF",
+        data=f.read(),
+        file_name="reporte_estacionamiento.pdf",
+        mime="application/pdf"
+    )
