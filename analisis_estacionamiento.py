@@ -118,24 +118,28 @@ if archivo:
     st.write(f"Se detectaron {len(tarifas_altas)} registros con tarifas superiores al percentil 95 (${umbral:.2f})")
     st.dataframe(tarifas_altas[['CheckIn_Date', 'Parking_Cost']])
 
-    # 📊 Guardar gráficos como imágenes
+    # 📊 Guardar gráficos como imágenes con calidad y ajuste
     fig1, ax1 = plt.subplots()
     carros_por_mes.plot(kind='bar', ax=ax1)
-    fig1.savefig("grafico_carros.png", bbox_inches='tight')
+    fig1.savefig("grafico_carros.png", bbox_inches='tight', dpi=300)
 
     fig2, ax2 = plt.subplots()
     tabla_tarifas.set_index("Tarifa")["Cantidad"].plot(kind='bar', ax=ax2)
-    fig2.savefig("grafico_tarifas.png", bbox_inches='tight')
+    fig2.savefig("grafico_tarifas.png", bbox_inches='tight', dpi=300)
 
-    # 📄 Generar HTML y ofrecer descarga
-    html = generar_html("grafico_carros.png", "grafico_tarifas.png", resumen_kpi)
-    with open("reporte_estacionamiento.html", "w", encoding="utf-8") as f:
-        f.write(html)
-    with open("reporte_estacionamiento.html", "rb") as f:
-        st.download_button(
-            label="📥 Descargar reporte HTML",
-            data=f.read(),
-            file_name="reporte_estacionamiento.html",
-            mime="text/html"
-        )
-    st.info("Puedes abrir el archivo HTML en tu navegador y usar **Imprimir → Guardar como PDF** para obtener una versión en PDF.")
+    # ✅ Verificar que las imágenes existen
+    if not os.path.exists("grafico_carros.png") or not os.path.exists("grafico_tarifas.png"):
+        st.error("❌ Las imágenes no se generaron correctamente. Verifica los gráficos.")
+    else:
+        # 📄 Generar HTML y ofrecer descarga
+        html = generar_html("grafico_carros.png", "grafico_tarifas.png", resumen_kpi)
+        with open("reporte_estacionamiento.html", "w", encoding="utf-8") as f:
+            f.write(html)
+        with open("reporte_estacionamiento.html", "rb") as f:
+            st.download_button(
+                label="📥 Descargar reporte HTML",
+                data=f.read(),
+                file_name="reporte_estacionamiento.html",
+                mime="text/html"
+            )
+        st.info("Puedes abrir el archivo HTML en tu navegador y usar **Imprimir → Guardar como PDF** para obtener una versión en PDF.")
