@@ -4,14 +4,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from jinja2 import Environment, FileSystemLoader
 import os
+import base64
+
+# Función para convertir imagen a base64
+def imagen_base64(ruta):
+    with open(ruta, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
 
 # Función para generar HTML desde plantilla
-def generar_html(grafico_carros, grafico_tarifas, resumen_kpi, plantilla="reporte_template.html"):
+def generar_html(grafico_carros_b64, grafico_tarifas_b64, resumen_kpi, plantilla="reporte_template.html"):
     env = Environment(loader=FileSystemLoader('.'))
     template = env.get_template(plantilla)
     return template.render(
-        grafico_carros=grafico_carros,
-        grafico_tarifas=grafico_tarifas,
+        grafico_carros=f"data:image/png;base64,{grafico_carros_b64}",
+        grafico_tarifas=f"data:image/png;base64,{grafico_tarifas_b64}",
         tabla_kpi=resumen_kpi.to_html(index=False)
     )
 
@@ -118,7 +124,7 @@ if archivo:
     st.write(f"Se detectaron {len(tarifas_altas)} registros con tarifas superiores al percentil 95 (${umbral:.2f})")
     st.dataframe(tarifas_altas[['CheckIn_Date', 'Parking_Cost']])
 
-    # 📊 Guardar gráficos como imágenes con calidad y ajuste
+    # 📊 Guardar gráficos como imágenes
     fig1, ax1 = plt.subplots()
     carros_por_mes.plot(kind='bar', ax=ax1)
     fig1.savefig("grafico_carros.png", bbox_inches='tight', dpi=300)
@@ -127,19 +133,19 @@ if archivo:
     tabla_tarifas.set_index("Tarifa")["Cantidad"].plot(kind='bar', ax=ax2)
     fig2.savefig("grafico_tarifas.png", bbox_inches='tight', dpi=300)
 
-    # ✅ Verificar que las imágenes existen
-    if not os.path.exists("grafico_carros.png") or not os.path.exists("grafico_tarifas.png"):
-        st.error("❌ Las imágenes no se generaron correctamente. Verifica los gráficos.")
-    else:
-        # 📄 Generar HTML y ofrecer descarga
-        html = generar_html("grafico_carros.png", "grafico_tarifas.png", resumen_kpi)
-        with open("reporte_estacionamiento.html", "w", encoding="utf-8") as f:
-            f.write(html)
-        with open("reporte_estacionamiento.html", "rb") as f:
-            st.download_button(
-                label="📥 Descargar reporte HTML",
-                data=f.read(),
-                file_name="reporte_estacionamiento.html",
-                mime="text/html"
-            )
-        st.info("Puedes abrir el archivo HTML en tu navegador y usar **Imprimir → Guardar como PDF** para obtener una versión en PDF.")
+    # 🔁 Convertir imágenes a base64
+    grafico_carros_b64 = imagen_base64("grafico_carros.png")
+    grafico_tarifas_b64 = imagen_base64("grafico_tarifas.png")
+
+    # 📄 Generar HTML y ofrecer descarga
+    html = generar_html(grafico_carros_b64, grafico_tarifas_b64, resumen_kpi)
+    with open("reporte_estacionamiento.html", "w", encoding="utf-8") as f:
+        f.write(html)
+    with open("reporte_estacionamiento.html", "rb") as f:
+        st.download_button(
+            label="📥 Descargar reporte HTML",
+            data=f.read(),
+            file_name="reporte_estacionamiento.html",
+            mime="text/html"
+        )
+    st.info("Puedes abrir el archivo HTML en tu navegador y usar **Imprimir → Guardar como PDF** para obtener una versión en PDF.")
