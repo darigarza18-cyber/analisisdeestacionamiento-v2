@@ -88,10 +88,7 @@ if archivos:
     # Guardar tabla en HTML
     tabla_dia_html = carros_por_dia.to_html(index=False)
     # Guardar gráfico como imagen
-    fig_dia, ax_dia = plt.subplots()
-    carros_por_dia.set_index('Fecha')['Cantidad'].plot(kind='line', ax=ax_dia, marker='o')
-    fig_dia.savefig("grafico_dia.png", bbox_inches='tight', dpi=300)
-    grafico_dia_b64 =imagen_base64("grafico_dia.png")
+        
 
     df['Parking_Cost'] = pd.to_numeric(df['Parking_Cost'], errors='coerce')
     pago_promedio = df['Parking_Cost'].mean()
@@ -166,10 +163,18 @@ if archivos:
     hist_df.set_index("Rango")["Cantidad"].plot(kind='bar', ax=ax3)
     fig3.savefig("grafico_histograma.png", bbox_inches='tight', dpi=300)
 
+    fig_dia, ax_dia = plt.subplots(figsize=(10,4))
+    carros_por_dia.set_index('Fecha')['Cantidad'].plot(kind='line', ax=ax_dia, marker='o')
+    fig_dia.savefig("grafico_dia.png", bbox_inches='tight', dpi=300)
+
+    
+
     # Convertir imágenes a base64
     grafico_carros_b64 = imagen_base64("grafico_carros.png")
     grafico_tarifas_b64 = imagen_base64("grafico_tarifas.png")
     grafico_histograma_b64 = imagen_base64("grafico_histograma.png")
+    grafico_dia_b64 = imagen_base64("grafico_dia.png")
+
 
     # Generar HTML (con carros por día incluidos)
     html = generar_html(
