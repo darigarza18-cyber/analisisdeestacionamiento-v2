@@ -173,7 +173,7 @@ if archivos:
     grafico_tarifas_b64 = imagen_base64("grafico_tarifas.png")
     grafico_histograma_b64 = imagen_base64("grafico_histograma.png")
 
-    # Generar HTML
+    # Generar HTML (con carros por día incluidos)
     html = generar_html(
         grafico_carros_b64,
         grafico_tarifas_b64,
@@ -182,8 +182,10 @@ if archivos:
         tabla_inusuales_html,
         archivo_seleccionado,
         fecha_generacion,
-        logo_src
-    )
+        logo_src,
+        grafico_dia_b64,
+        tabla_dia_html
+        )
 
     with open("reporte_estacionamiento.html", "w", encoding="utf-8") as f:
         f.write(html)
