@@ -91,9 +91,7 @@ if archivos:
     fig_dia, ax_dia = plt.subplots()
     carros_por_dia.set_index('Fecha')['Cantidad'].plot(kind='line', ax=ax_dia, marker='o')
     fig_dia.savefig("grafico_dia.png", bbox_inches='tight', dpi=300)
-
-    # Convertir gráfico a base64
-    grafico_dia_b64 = imagen_base64("grafico_dia.png")
+    grafico_dia_b64 =imagen_base64("grafico_dia.png")
 
     df['Parking_Cost'] = pd.to_numeric(df['Parking_Cost'], errors='coerce')
     pago_promedio = df['Parking_Cost'].mean()
