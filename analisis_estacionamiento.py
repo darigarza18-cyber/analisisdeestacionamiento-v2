@@ -163,7 +163,7 @@ if archivos:
     hist_df.set_index("Rango")["Cantidad"].plot(kind='bar', ax=ax3)
     fig3.savefig("grafico_histograma.png", bbox_inches='tight', dpi=300)
 
-    fig_dia, ax_dia = plt.subplots(figsize=(10,4))
+    fig_dia, ax_dia = plt.subplots(figsize=(11,4))
     carros_por_dia.set_index('Fecha')['Cantidad'].plot(kind='line', ax=ax_dia, marker='o')
     fig_dia.savefig("grafico_dia.png", bbox_inches='tight', dpi=300)
 
