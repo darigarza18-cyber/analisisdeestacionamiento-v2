@@ -112,6 +112,12 @@
     {{ tabla_kpi | safe }}
   </div>
 
+  <div class="section">
+  <h2>📅 Carros por día</h2>
+  <img class="chart" src="data:image/png;base64,{{ grafico_dia_b64 }}" alt="Gráfico de carros por día">
+  {{ tabla_dia_html | safe }}
+  </div>
+
   <div class="footer">
     <p>Este reporte fue generado automáticamente por la aplicación de análisis de estacionamiento. Autor: Dario Garza Q.</p>
   </div>

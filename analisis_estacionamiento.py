@@ -15,6 +15,7 @@ def imagen_base64(ruta):
 # Función para generar HTML desde plantilla
 def generar_html(grafico_carros_b64, grafico_tarifas_b64, grafico_histograma_b64,
                  resumen_kpi, tabla_inusuales_html, archivo_origen, fecha_generacion, logo_src,
+                 grafico_dia_b64, tabla_dia_html,
                  plantilla="reporte_template.html"):
     env = Environment(loader=FileSystemLoader('.'))
     template = env.get_template(plantilla)
@@ -26,7 +27,9 @@ def generar_html(grafico_carros_b64, grafico_tarifas_b64, grafico_histograma_b64
         tabla_inusuales=tabla_inusuales_html,
         archivo_origen=archivo_origen,
         fecha_generacion=fecha_generacion,
-        logo_src=logo_src
+        logo_src=logo_src,
+        grafico_dia_b64=f"data:image/png;base64,{grafico_dia_b64}",
+        tabla_dia_html=tabla_dia_html
     )
 
 # Cargar logo
@@ -67,6 +70,30 @@ if archivos:
     carros_por_mes = df_validas['Mes'].value_counts().sort_index()
     st.subheader("🚗 Cantidad de carros por mes")
     st.bar_chart(carros_por_mes)
+
+    # --- Carros por día ---
+    st.subheader("📅 Cantidad de carros por día")
+
+    # Crear columna solo con la fecha (sin hora)
+    df_validas['Fecha'] = df_validas['CheckIn_Date'].dt.date
+
+    # Agrupar por fecha
+    carros_por_dia = df_validas.groupby('Fecha').size().reset_index(name='Cantidad')
+    # Mostrar tabla en Streamlit
+    st.dataframe(carros_por_dia)
+
+    # Mostrar gráfico de líneas
+    st.line_chart(carros_por_dia.set_index('Fecha'))
+
+    # Guardar tabla en HTML
+    tabla_dia_html = carros_por_dia.to_html(index=False)
+    # Guardar gráfico como imagen
+    fig_dia, ax_dia = plt.subplots()
+    carros_por_dia.set_index('Fecha')['Cantidad'].plot(kind='line', ax=ax_dia, marker='o')
+    fig_dia.savefig("grafico_dia.png", bbox_inches='tight', dpi=300)
+
+    # Convertir gráfico a base64
+    grafico_dia_b64 = imagen_base64("grafico_dia.png")
 
     df['Parking_Cost'] = pd.to_numeric(df['Parking_Cost'], errors='coerce')
     pago_promedio = df['Parking_Cost'].mean()
